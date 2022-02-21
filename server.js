@@ -6,14 +6,13 @@ const dbData = require('./db/db.json');
 // Helper method for generating unique ids
 const uuid = require('./helper/uuid');
 
+
 const app = express();
-const PORT = 3001;
+const PORT =  process.env.PORT || 3001;
 
 // middleware for parsing JSON and urlencoded form data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', api);
-
 app.use(express.static('public'));
 
 // GET route for homepage
@@ -27,7 +26,9 @@ app.get('/notes', (req, res) =>
 );
 
 // GET route to get all the notes from the database
-app.get('/api/notes', (req, res) => res.json(dbData));
+app.get('/api/notes', (req, res) => 
+    res.sendFile(path.join(__dirname,"./db/db.json"))
+);
 
 // POST new note to save on the request body and add to db.json file
 app.post('/api/notes', (req, res) => {
@@ -66,6 +67,14 @@ app.post('/api/notes', (req, res) => {
         res.status(500).json('Error in adding and saving new notes');
     }
 
+})
+
+// DELETE the notes that are not wanted
+app.delete("/api/notes/:id", (req, res) => {
+    const notes = JSON.parse(fs.readFileSync('./db/db.json'));
+    const delNotes = notes.filter((removeNote) => removeNote.id !== req.params.id);
+    fs.writeFileSync('./db/db.json', JSON.stringify(delNotes));
+    res.json(delNotes);
 })
 
 app.listen(PORT, () =>
