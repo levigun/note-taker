@@ -28,6 +28,12 @@ To use the note taker app, please open this link https://cryptic-sea-32619.herok
 
 ## App Look
 
+![app-look-1](./assets/app-look-1.png)
+
+![app-look-2](./assets/app-look-2.png)
+
+![app-look-3](./assets/app-look-3.png)
+
 ## Reference
 
 https://coding-boot-camp.github.io/full-stack/github/professional-readme-guide
