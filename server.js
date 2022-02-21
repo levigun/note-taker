@@ -1,8 +1,6 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-// custome middleware?
-const dbData = require('./db/db.json');
 // Helper method for generating unique ids
 const uuid = require('./helper/uuid');
 
@@ -15,10 +13,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// GET route for homepage
-app.get('*', (req, res) => 
-    res.sendFile(path.join(__dirname, '/public/index.html'))
-);
 
 // GET route for notes page
 app.get('/notes', (req, res) => 
@@ -40,29 +34,21 @@ app.post('/api/notes', (req, res) => {
         const newNotes = {
             title,
             text,
-            review_id: uuid(),
+            id: uuid(),
         };
 
-        // pushing the new entered notes to the db.json file
-        dbData.push(newNotes);
 
-        // convert the data to a string so that we can save it
-        const noteString = JSON.stringify(newNotes, undefined, 3);
+        const notes = JSON.parse(fs.readFileSync('./db/db.json'));
+        notes.push(newNotes);
 
         // Write the string to a file
-        fs.writeFile('./db/db.json', noteString, (err) => 
+        fs.writeFile('./db/db.json', JSON.stringify(notes), (err) => 
             err
                 ? console.err(err)
                 : console.log (`Not with the title of ${newNotes.title} jas been added to JSON file`)
         );
 
-        const response = {
-            status: 'Success',
-            body: newNotes,
-        };
-
-        console.log(response);
-        res.status(201).json(response);
+        res.status(201).json(newNotes);
     } else {
         res.status(500).json('Error in adding and saving new notes');
     }
@@ -75,7 +61,12 @@ app.delete("/api/notes/:id", (req, res) => {
     const delNotes = notes.filter((removeNote) => removeNote.id !== req.params.id);
     fs.writeFileSync('./db/db.json', JSON.stringify(delNotes));
     res.json(delNotes);
-})
+});
+
+// GET route for homepage
+app.get('/', (req, res) => 
+    res.sendFile(path.join(__dirname, '/public/index.html'))
+);
 
 app.listen(PORT, () =>
   console.log(`Example app listening at http://localhost:${PORT}`)
